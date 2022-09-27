@@ -1,54 +1,46 @@
 const gameStartBtn = document.querySelector('#start-btn')
+const testBtn = document.querySelector('#test-btn')
 gameStartBtn.addEventListener('click', gameStart)
-const canvas = document.querySelector('canvas')
+testBtn.addEventListener('click', rotate)
+const canvas = document.querySelector('#main-canvas')
 const ctx = canvas.getContext('2d')
 
 let isGameStarted = false
 let timer
 
-const startPosX=10
-const startPosY=10
-const gridCountX=10
-const gridCountY=20
-const gridSize = 10
-const scorePerRow=100
-const fallspeed=1
 const directionCoordinate=[[1,0],[-1,0],[0,1]]
 
-let fallenGridMap=[]
-let fallingGridMap=[]
 let score=0
 let random=Math.random()
-let currentPosX = 10
-let currentPosY = 10
+let currentPosX
+let currentPosY
+let scorePerRow=100
 
+let currentTetrimino
+let currentTetriminoMode=0
+
+
+initialization()
 
 function initialization(){
-    ctx.canvas.width=gridCountX*gridSize
-    ctx.canvas.height=gridCountY*gridSize
-}
-
-
-function drawBlock(x, y) {
-    ctx.fillStyle = 'green'
-    ctx.fillRect(x, y, gridSize, gridSize)
-}
-
-
-function fall() {
-    if(isGameStarted){
-        currentPosY += gridSize
-        drawBlock(currentPosX, currentPosY)
-        console.log("fall")
+    ctx.canvas.width=GridCountX*GridSize
+    ctx.canvas.height=GridCountY*GridSize
+    for(let i=0;i<GridCountY;i++){
+        let tempRow=[]
+        for(let j=0;j<GridCountX;j++){
+            tempRow.push(0)
+        }
+        FallenBlockMap.push(tempRow)
+        // FallingBlockMap.push(tempRow)
     }
+    currentPosX=StartPosX
+    currentPosY=StartPosY
+    currentTetrimino=new ITetrimino(StartPosX,StartPosY)
 }
-
-
 
 function gameStart(){
-    console.log("isGameStarted:%s;interval:%s",isGameStarted,timer)
     if(!timer && !isGameStarted){
-        timer = setInterval(fall,1000)
+        timer = setInterval(moveDown,1000)
         isGameStarted=true
         gameStartBtn.innerText='Pause'
     }else if(isGameStarted){
@@ -58,3 +50,51 @@ function gameStart(){
         gameStartBtn.innerText='Restart'
     }
 }
+
+
+function renderFallenBlock(){
+    for(let i=0;i<GridCountY;i++){
+        for(let j=0;j<GridCountX;j++){
+            if(FallenBlockMap[i][j]!=0){
+                drawBlock(j, i,Colors[FallenBlockMap[i][j]])
+            }
+        }
+    }
+}
+
+function renderTetrimino(t,mode,tf){
+    if(tf){
+        for(let i=0;i<4;i++){
+            drawBlock(t.getCoordinate(mode)[i][0],t.getCoordinate(mode)[i][1],t.getColorIndex())
+        }
+    }else{
+        for(let i=0;i<4;i++){
+            drawBlock(t.getCoordinate(mode)[i][0],t.getCoordinate(mode)[i][1],0)
+        }
+    }
+    
+}
+
+function drawBlock(x, y,colorIndex) {
+    ctx.fillStyle = Colors[colorIndex]
+    ctx.fillRect(x*GridSize, y*GridSize, GridSize, GridSize)
+}
+
+function rotate(){
+    renderTetrimino(currentTetrimino,currentTetriminoMode,false)
+    currentTetriminoMode++
+    currentTetriminoMode=currentTetriminoMode%currentTetrimino.getMaxModeNum()
+    renderTetrimino(currentTetrimino,currentTetriminoMode,true)
+}
+
+
+function moveDown() {
+    renderTetrimino(currentTetrimino,currentTetriminoMode,false)
+    currentTetrimino.y++
+    console.log(currentTetrimino.y)
+    renderTetrimino(currentTetrimino,currentTetriminoMode,true)
+}
+
+
+
+
