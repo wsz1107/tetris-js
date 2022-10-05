@@ -6,11 +6,11 @@ const GridSize = 10
 const FallSpeed=1
 const Colors=[
     'white',
+    'cyan',
     'yellow',
-    'purple',
-    'red',
     'green',
-    'orange',
+    'red',
     'blue',
-    'cyan'
+    'orange',
+    'purple'
 ]
