@@ -1,23 +1,35 @@
 const gameStartBtn = document.querySelector('#start-btn')
+const rotateBtn = document.querySelector('#roate-btn')
+const downBtn = document.querySelector('#down-btn')
+const leftBtn = document.querySelector('#left-btn')
+const rightBtn = document.querySelector('#right-btn')
 const testBtn = document.querySelector('#test-btn')
-gameStartBtn.addEventListener('click', gameStart)
-testBtn.addEventListener('click', rotate)
+
 const canvas = document.querySelector('#main-canvas')
 const ctx = canvas.getContext('2d')
 
 let isGameStarted = false
 let timer
-
-const directionCoordinate=[[1,0],[-1,0],[0,1]]
-
 let score=0
 let random=Math.random()
 let currentPosX
 let currentPosY
+let nextTetriminoCoor
 let scorePerRow=100
-
 let currentTetrimino
 let currentTetriminoMode=0
+let FallenBlockMap=[]
+
+gameStartBtn.addEventListener('click', gameStart)
+rotateBtn.addEventListener('click', rotate)
+downBtn.addEventListener('click', moveDown)
+leftBtn.addEventListener('click', moveLeft)
+rightBtn.addEventListener('click', moveRight)
+testBtn.addEventListener('click',testMsg)
+
+function testMsg(){
+    console.log(FallenBlockMap)
+}
 
 
 initialization()
@@ -31,11 +43,14 @@ function initialization(){
             tempRow.push(0)
         }
         FallenBlockMap.push(tempRow)
-        // FallingBlockMap.push(tempRow)
     }
-    currentPosX=StartPosX
-    currentPosY=StartPosY
-    currentTetrimino=new ITetrimino(StartPosX,StartPosY)
+    //test
+    for(let i=1;i<GridCountX;i++){
+        FallenBlockMap[19][i]=1
+    }
+    renderFallenBlock()
+
+    createNewTetromino()
 }
 
 function gameStart(){
@@ -55,9 +70,7 @@ function gameStart(){
 function renderFallenBlock(){
     for(let i=0;i<GridCountY;i++){
         for(let j=0;j<GridCountX;j++){
-            if(FallenBlockMap[i][j]!=0){
-                drawBlock(j, i,Colors[FallenBlockMap[i][j]])
-            }
+            drawBlock(j,i,FallenBlockMap[i][j])
         }
     }
 }
@@ -72,7 +85,6 @@ function renderTetrimino(t,mode,tf){
             drawBlock(t.getCoordinate(mode)[i][0],t.getCoordinate(mode)[i][1],0)
         }
     }
-    
 }
 
 function drawBlock(x, y,colorIndex) {
@@ -80,20 +92,7 @@ function drawBlock(x, y,colorIndex) {
     ctx.fillRect(x*GridSize, y*GridSize, GridSize, GridSize)
 }
 
-function rotate(){
-    renderTetrimino(currentTetrimino,currentTetriminoMode,false)
-    currentTetriminoMode++
-    currentTetriminoMode=currentTetriminoMode%currentTetrimino.getMaxModeNum()
-    renderTetrimino(currentTetrimino,currentTetriminoMode,true)
-}
 
-
-function moveDown() {
-    renderTetrimino(currentTetrimino,currentTetriminoMode,false)
-    currentTetrimino.y++
-    console.log(currentTetrimino.y)
-    renderTetrimino(currentTetrimino,currentTetriminoMode,true)
-}
 
 
 
