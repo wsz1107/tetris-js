@@ -1,8 +1,23 @@
-function createNewTetromino() {
-    currentPosX = StartPosX
-    currentPosY = StartPosY
-    currentTetriminoMode = 0
-    currentTetrimino = new TTetrimino(currentPosX, currentPosY)
+function createNewTetromino(x, y, type) {
+
+    switch (type) {
+        case 0:
+            return new ITetrimino(x, y)
+        case 1:
+            return new OTetrimino(x, y)
+        case 2:
+            return new STetrimino(x, y)
+        case 3:
+            return new ZTetrimino(x, y)
+        case 4:
+            return new JTetrimino(x, y)
+        case 5:
+            return new LTetrimino(x, y)
+        case 6:
+            return new TTetrimino(x, y)
+        default:
+            return null
+    }
 }
 
 function addToFallenBlockMap(coordinates, colorIndex) {
@@ -12,61 +27,63 @@ function addToFallenBlockMap(coordinates, colorIndex) {
 }
 
 function rotate() {
-    renderTetrimino(currentTetrimino, currentTetriminoMode, false)
+    renderTetrimino(currentTetrimino, currentTetriminoMode, 'erase','main')
     let nextMode = (currentTetriminoMode + 1) % currentTetrimino.getMaxModeNum()
     nextTetriminoCoor = currentTetrimino.getCoordinate(nextMode)
     if (!isCollided(nextTetriminoCoor)) {
-        renderTetrimino(currentTetrimino, nextMode, true)
+        renderTetrimino(currentTetrimino, nextMode, 'draw', 'main')
         currentTetriminoMode = nextMode
     } else {
-        renderTetrimino(currentTetrimino, currentTetriminoMode, true)
+        renderTetrimino(currentTetrimino, currentTetriminoMode, 'draw', 'main')
     }
 }
 
 function moveDown() {
-    renderTetrimino(currentTetrimino, currentTetriminoMode, false)
+    renderTetrimino(currentTetrimino, currentTetriminoMode, 'erase', 'main')
     currentTetrimino.y++
     nextTetriminoCoor = currentTetrimino.getCoordinate(currentTetriminoMode)
     if (!isCollided(nextTetriminoCoor)) {
-
-        renderTetrimino(currentTetrimino, currentTetriminoMode, true)
+        renderTetrimino(currentTetrimino, currentTetriminoMode, 'draw', 'main')
     } else {
         currentTetrimino.y--
-        renderTetrimino(currentTetrimino, currentTetriminoMode, true)
+        renderTetrimino(currentTetrimino, currentTetriminoMode, 'draw', 'main')
         addToFallenBlockMap(currentTetrimino.getCoordinate(currentTetriminoMode), currentTetrimino.getColorIndex())
         checkRow()
-        createNewTetromino()
+        currentTetrimino = createNewTetromino(StartPosX, StartPosY, nextTetriminoType)
+        currentTetriminoMode=0
+        renderTetrimino(nextTetrimino, currentTetriminoMode, 'erase', 'next')
+        nextTetriminoType = Math.floor(Math.random() * 7)
+        nextTetrimino = createNewTetromino(NextPosX, NextPosY, nextTetriminoType)
+        renderTetrimino(nextTetrimino, currentTetriminoMode, 'draw', 'next')
+
         if (isGameOver()) {
             clearInterval(timer)
         }
-
         renderFallenBlock()
-        createNewTetromino()
     }
-
 }
 
 function moveLeft() {
-    renderTetrimino(currentTetrimino, currentTetriminoMode, false)
+    renderTetrimino(currentTetrimino, currentTetriminoMode, 'erase', 'main')
     currentTetrimino.x--
     nextTetriminoCoor = currentTetrimino.getCoordinate(currentTetriminoMode)
     if (!isCollided(nextTetriminoCoor)) {
-        renderTetrimino(currentTetrimino, currentTetriminoMode, true)
+        renderTetrimino(currentTetrimino, currentTetriminoMode, 'draw', 'main')
     } else {
         currentTetrimino.x++
-        renderTetrimino(currentTetrimino, currentTetriminoMode, true)
+        renderTetrimino(currentTetrimino, currentTetriminoMode, 'draw', 'main')
     }
 }
 
 function moveRight() {
-    renderTetrimino(currentTetrimino, currentTetriminoMode, false)
+    renderTetrimino(currentTetrimino, currentTetriminoMode, 'erase', 'main')
     currentTetrimino.x++
     nextTetriminoCoor = currentTetrimino.getCoordinate(currentTetriminoMode)
     if (!isCollided(nextTetriminoCoor)) {
-        renderTetrimino(currentTetrimino, currentTetriminoMode, true)
+        renderTetrimino(currentTetrimino, currentTetriminoMode, 'draw', 'main')
     } else {
         currentTetrimino.x--
-        renderTetrimino(currentTetrimino, currentTetriminoMode, true)
+        renderTetrimino(currentTetrimino, currentTetriminoMode, 'draw', 'main')
     }
 }
 
@@ -88,9 +105,7 @@ function isCollided(coordinates) {
 function isGameOver() {
     for (let i = 0; i < currentTetrimino.getCoordinate(currentTetriminoMode).length; i++) {
         if (FallenBlockMap[currentTetrimino.getCoordinate(currentTetriminoMode)[i][1]][currentTetrimino.getCoordinate(currentTetriminoMode)[i][0]] != 0) {
-            console.log(`x=${currentTetrimino.getCoordinate(currentTetriminoMode)[i][0]}, 
-                        y=${currentTetrimino.getCoordinate(currentTetriminoMode)[i][1]},
-                        fallen=${FallenBlockMap[currentTetrimino.getCoordinate(currentTetriminoMode)[i][1]][currentTetrimino.getCoordinate(currentTetriminoMode)[i][0]]}`)
+            console.log("Game Over!!!")
             return true
         }
     }
@@ -113,7 +128,6 @@ function checkRow() {
         if (multi != 0) {
             FallenBlockMap = FallenBlockMap.slice(0, row).concat(FallenBlockMap.slice(row + 1, GridCountY - 1))
             FallenBlockMap.unshift([0, 0, 0, 0, 0, 0, 0, 0, 0, 0])
-            renderFallenBlock()
         } else {
             row--
         }
@@ -225,14 +239,14 @@ class JTetrimino {
     getCoordinate(mode) {
         switch (mode) {
             case 0:
-                return [[this.x-1, this.y - 1], [this.x - 1, this.y], [this.x, this.y], [this.x+1, this.y ]]
+                return [[this.x - 1, this.y - 1], [this.x - 1, this.y], [this.x, this.y], [this.x + 1, this.y]]
             case 1:
-                return [[this.x, this.y-1], [this.x, this.y], [this.x-1, this.y + 1], [this.x, this.y + 1]]
+                return [[this.x, this.y - 1], [this.x, this.y], [this.x - 1, this.y + 1], [this.x, this.y + 1]]
             case 2:
-                return [[this.x-1, this.y], [this.x, this.y], [this.x+1, this.y], [this.x+1, this.y + 1]]
+                return [[this.x - 1, this.y], [this.x, this.y], [this.x + 1, this.y], [this.x + 1, this.y + 1]]
             case 3:
-                return [[this.x, this.y - 1], [this.x+1, this.y-1], [this.x, this.y], [this.x , this.y + 1]]
-            
+                return [[this.x, this.y - 1], [this.x + 1, this.y - 1], [this.x, this.y], [this.x, this.y + 1]]
+
             default:
                 return null;
         }
@@ -253,14 +267,14 @@ class LTetrimino {
     getCoordinate(mode) {
         switch (mode) {
             case 0:
-                return [ [this.x - 1, this.y], [this.x, this.y], [this.x+1, this.y ],[this.x-1, this.y + 1]]
+                return [[this.x - 1, this.y], [this.x, this.y], [this.x + 1, this.y], [this.x - 1, this.y + 1]]
             case 1:
-                return [[this.x, this.y-1], [this.x, this.y], [this.x, this.y + 1], [this.x+1, this.y + 1]]
+                return [[this.x, this.y - 1], [this.x, this.y], [this.x, this.y + 1], [this.x + 1, this.y + 1]]
             case 2:
-                return [ [this.x+1, this.y - 1],[this.x-1, this.y], [this.x, this.y], [this.x+1, this.y]]
+                return [[this.x + 1, this.y - 1], [this.x - 1, this.y], [this.x, this.y], [this.x + 1, this.y]]
             case 3:
-                return [[this.x-1, this.y - 1], [this.x, this.y-1], [this.x, this.y], [this.x , this.y + 1]]
-            
+                return [[this.x - 1, this.y - 1], [this.x, this.y - 1], [this.x, this.y], [this.x, this.y + 1]]
+
             default:
                 return null;
         }
@@ -281,13 +295,13 @@ class TTetrimino {
     getCoordinate(mode) {
         switch (mode) {
             case 0:
-                return [[this.x, this.y-1], [this.x-1, this.y], [this.x, this.y], [this.x+1, this.y]]
+                return [[this.x, this.y - 1], [this.x - 1, this.y], [this.x, this.y], [this.x + 1, this.y]]
             case 1:
-                return [ [this.x, this.y - 1],[this.x-1, this.y], [this.x, this.y], [this.x, this.y+1]]
+                return [[this.x, this.y - 1], [this.x - 1, this.y], [this.x, this.y], [this.x, this.y + 1]]
             case 2:
-                return [[this.x-1, this.y], [this.x, this.y], [this.x+1, this.y], [this.x , this.y + 1]]
+                return [[this.x - 1, this.y], [this.x, this.y], [this.x + 1, this.y], [this.x, this.y + 1]]
             case 3:
-                return [ [this.x, this.y-1], [this.x, this.y], [this.x+1, this.y ],[this.x, this.y + 1]]
+                return [[this.x, this.y - 1], [this.x, this.y], [this.x + 1, this.y], [this.x, this.y + 1]]
             default:
                 return null;
         }
