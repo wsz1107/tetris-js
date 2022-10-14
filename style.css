@@ -1,6 +1,63 @@
-button{
-    margin:4px;
-}
 canvas{
     border: 2px solid;
+    margin-top:15px;
+    margin-bottom:15px;
+}
+
+#main-canvas{
+    margin-left: 30px;
+    margin-right: 10px;
+}
+
+button{
+    float:left;
+    text-align: center;
+    background-color: black;
+    color:white;
+}
+
+.button{
+    display: flex;
+}
+
+.dir-btn{
+    width: 150px;
+    height: 60px;
+    position: relative;
+    
+}
+
+.dir_div{
+    position: relative;
+    width: 30px;
+    height: 30px;
+}
+
+.up_dir{
+    top:2%;
+    left:40%;
+}
+
+.left_dir{
+    top:10%;
+    left:20%;
+}
+
+.right_dir{
+    top:-39%;
+    left:61%;
+}
+
+.down_dir{
+    top:-30%;
+    left:40%;
+}
+
+.sys-btn{
+    float: left;
+    margin:10px;
+}
+
+#test-btn{
+    display: none;
 }

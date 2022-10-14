@@ -1,5 +1,5 @@
+//create tetromino or turn add tetromino to stack 
 function createNewTetromino(x, y, type) {
-
     switch (type) {
         case 0:
             return new ITetrimino(x, y)
@@ -20,96 +20,126 @@ function createNewTetromino(x, y, type) {
     }
 }
 
+function addTetriminoToCanvas() {
+    currentTetriminoMode = 0
+    if (typeof nextTetrimino != "undefined" && typeof nextTetriminoType != "undefined") {
+        //copy next tetrimino to current one and render it
+        currentTetrimino = createNewTetromino(StartPosX, StartPosY, nextTetriminoType)
+        // renderTetrimino(currentTetrimino, currentTetriminoMode, 'draw', 'main')
+        //clear the next canvas
+        renderTetrimino(nextTetrimino, currentTetriminoMode, 'erase', 'next')
+    } else {
+        //create a current tetrimino and render it
+        nextTetriminoType = Math.floor(Math.random() * 7)
+        currentTetrimino = createNewTetromino(StartPosX, StartPosY, nextTetriminoType)
+        // renderTetrimino(currentTetrimino, currentTetriminoMode, 'draw', 'main')
+    }
+    //create a new next tetrimino and render it
+    nextTetriminoType = Math.floor(Math.random() * 7)
+    nextTetrimino = createNewTetromino(NextPosX, NextPosY, nextTetriminoType)
+    // renderTetrimino(nextTetrimino, currentTetriminoMode, 'draw', 'next')
+}
+
 function addToFallenBlockMap(coordinates, colorIndex) {
     for (let i = 0; i < coordinates.length; i++) {
         FallenBlockMap[coordinates[i][1]][coordinates[i][0]] = colorIndex
     }
 }
 
+
+//change Tetrimino's location/status
 function rotate() {
-    renderTetrimino(currentTetrimino, currentTetriminoMode, 'erase','main')
-    let nextMode = (currentTetriminoMode + 1) % currentTetrimino.getMaxModeNum()
-    nextTetriminoCoor = currentTetrimino.getCoordinate(nextMode)
-    if (!isCollided(nextTetriminoCoor)) {
-        renderTetrimino(currentTetrimino, nextMode, 'draw', 'main')
-        currentTetriminoMode = nextMode
-    } else {
-        renderTetrimino(currentTetrimino, currentTetriminoMode, 'draw', 'main')
+    if (isGameStarted) {
+        renderTetrimino(currentTetrimino, currentTetriminoMode, 'erase', 'main')
+        let nextMode = (currentTetriminoMode + 1) % currentTetrimino.getMaxModeNum()
+        nextTetriminoCoor = currentTetrimino.getCoordinate(nextMode)
+        if (!isCollided(nextTetriminoCoor)) {
+            renderTetrimino(currentTetrimino, nextMode, 'draw', 'main')
+            currentTetriminoMode = nextMode
+        } else {
+            renderTetrimino(currentTetrimino, currentTetriminoMode, 'draw', 'main')
+        }
     }
 }
 
 function moveDown() {
-    renderTetrimino(currentTetrimino, currentTetriminoMode, 'erase', 'main')
-    currentTetrimino.y++
-    nextTetriminoCoor = currentTetrimino.getCoordinate(currentTetriminoMode)
-    if (!isCollided(nextTetriminoCoor)) {
-        renderTetrimino(currentTetrimino, currentTetriminoMode, 'draw', 'main')
-    } else {
-        currentTetrimino.y--
-        renderTetrimino(currentTetrimino, currentTetriminoMode, 'draw', 'main')
-        addToFallenBlockMap(currentTetrimino.getCoordinate(currentTetriminoMode), currentTetrimino.getColorIndex())
-        checkRow()
-        currentTetrimino = createNewTetromino(StartPosX, StartPosY, nextTetriminoType)
-        currentTetriminoMode=0
-        renderTetrimino(nextTetrimino, currentTetriminoMode, 'erase', 'next')
-        nextTetriminoType = Math.floor(Math.random() * 7)
-        nextTetrimino = createNewTetromino(NextPosX, NextPosY, nextTetriminoType)
-        renderTetrimino(nextTetrimino, currentTetriminoMode, 'draw', 'next')
-
-        if (isGameOver()) {
-            clearInterval(timer)
+    if (isGameStarted) {
+        renderTetrimino(currentTetrimino, currentTetriminoMode, 'erase', 'main')
+        currentTetrimino.y++
+        nextTetriminoCoor = currentTetrimino.getCoordinate(currentTetriminoMode)
+        if (!isCollided(nextTetriminoCoor)) {
+            renderTetrimino(currentTetrimino, currentTetriminoMode, 'draw', 'main')
+        } else {
+            currentTetrimino.y--
+            renderTetrimino(currentTetrimino, currentTetriminoMode, 'draw', 'main')
+            addToFallenBlockMap(currentTetrimino.getCoordinate(currentTetriminoMode), currentTetrimino.getColorIndex())
+            checkRow()
+            addTetriminoToCanvas()
+            renderTetrimino(nextTetrimino, currentTetriminoMode, 'draw', 'next')
+            renderFallenBlock()
+            checkGameOver()
         }
-        renderFallenBlock()
     }
 }
 
 function moveLeft() {
-    renderTetrimino(currentTetrimino, currentTetriminoMode, 'erase', 'main')
-    currentTetrimino.x--
-    nextTetriminoCoor = currentTetrimino.getCoordinate(currentTetriminoMode)
-    if (!isCollided(nextTetriminoCoor)) {
-        renderTetrimino(currentTetrimino, currentTetriminoMode, 'draw', 'main')
-    } else {
-        currentTetrimino.x++
-        renderTetrimino(currentTetrimino, currentTetriminoMode, 'draw', 'main')
+    if (isGameStarted) {
+        renderTetrimino(currentTetrimino, currentTetriminoMode, 'erase', 'main')
+        currentTetrimino.x--
+        nextTetriminoCoor = currentTetrimino.getCoordinate(currentTetriminoMode)
+        if (!isCollided(nextTetriminoCoor)) {
+            renderTetrimino(currentTetrimino, currentTetriminoMode, 'draw', 'main')
+        } else {
+            currentTetrimino.x++
+            renderTetrimino(currentTetrimino, currentTetriminoMode, 'draw', 'main')
+        }
     }
 }
 
 function moveRight() {
-    renderTetrimino(currentTetrimino, currentTetriminoMode, 'erase', 'main')
-    currentTetrimino.x++
-    nextTetriminoCoor = currentTetrimino.getCoordinate(currentTetriminoMode)
-    if (!isCollided(nextTetriminoCoor)) {
-        renderTetrimino(currentTetrimino, currentTetriminoMode, 'draw', 'main')
-    } else {
-        currentTetrimino.x--
-        renderTetrimino(currentTetrimino, currentTetriminoMode, 'draw', 'main')
+    if (isGameStarted) {
+        renderTetrimino(currentTetrimino, currentTetriminoMode, 'erase', 'main')
+        currentTetrimino.x++
+        nextTetriminoCoor = currentTetrimino.getCoordinate(currentTetriminoMode)
+        if (!isCollided(nextTetriminoCoor)) {
+            renderTetrimino(currentTetrimino, currentTetriminoMode, 'draw', 'main')
+        } else {
+            currentTetrimino.x--
+            renderTetrimino(currentTetrimino, currentTetriminoMode, 'draw', 'main')
+        }
     }
+
 }
 
+
+//check Tetrimino's status
 function isCollided(coordinates) {
-    for (let i = 0; i < coordinates.length; i++) {
-        if (coordinates[i][0] < 0 || coordinates[i][0] >= GridCountX) {
-            return true
+    if (isGameStarted) {
+        for (let i = 0; i < coordinates.length; i++) {
+            if (coordinates[i][0] < 0 || coordinates[i][0] >= GridCountX) {
+                return true
+            }
+            if (coordinates[i][1] >= GridCountY) {
+                return true
+            }
+            if (FallenBlockMap[coordinates[i][1]][coordinates[i][0]] != 0) {
+                return true
+            }
         }
-        if (coordinates[i][1] >= GridCountY) {
-            return true
-        }
-        if (FallenBlockMap[coordinates[i][1]][coordinates[i][0]] != 0) {
-            return true
-        }
+        return false
     }
-    return false
 }
 
-function isGameOver() {
+function checkGameOver() {
     for (let i = 0; i < currentTetrimino.getCoordinate(currentTetriminoMode).length; i++) {
         if (FallenBlockMap[currentTetrimino.getCoordinate(currentTetriminoMode)[i][1]][currentTetrimino.getCoordinate(currentTetriminoMode)[i][0]] != 0) {
+            isGameOver=true
+            clearInterval(timerID)
+            timerID=null
             console.log("Game Over!!!")
-            return true
+            renderGameStatus("Gameover")
         }
     }
-    return false
 }
 
 function checkRow() {
@@ -128,6 +158,8 @@ function checkRow() {
         if (multi != 0) {
             FallenBlockMap = FallenBlockMap.slice(0, row).concat(FallenBlockMap.slice(row + 1, GridCountY - 1))
             FallenBlockMap.unshift([0, 0, 0, 0, 0, 0, 0, 0, 0, 0])
+            score+=10
+            renderScore()
         } else {
             row--
         }
@@ -135,6 +167,7 @@ function checkRow() {
 }
 
 
+//Tetrimino's class
 class ITetrimino {
     constructor(x, y) {
         this.x = x
