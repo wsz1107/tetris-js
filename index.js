@@ -43,7 +43,7 @@ function initialization() {
     ctxNext.fillStyle='black'
     ctxNext.fillText(' Next:',0,GridSize*2)
     renderScore()
-    testData()
+    // testData()
 }
 
 function gameStart() {
@@ -70,13 +70,13 @@ function gameStart() {
 //controller funcs
 function control(e){
     if(isGameStarted && !isGameOver){
-        if(e.keyCode === 37){
+        if(e.keyCode === 37 || e.keyCode === 65){
             moveLeft()
-          }else if(e.keyCode === 38){
+          }else if(e.keyCode === 38 || e.keyCode=== 87){
             rotate()
-          }else if(e.keyCode === 39){
+          }else if(e.keyCode === 39 || e.keyCode === 68){
             moveRight()
-          }else if(e.keyCode === 40){
+          }else if(e.keyCode === 40 || e.keyCode === 83){
             moveDown()
           }
     }
