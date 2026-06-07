@@ -20,24 +20,22 @@ function createNewTetromino(x, y, type) {
     }
 }
 
+// Set the next tetrimino as the current one, then create a new one for preview
 function addTetriminoToCanvas() {
     currentTetriminoMode = 0
     if (typeof nextTetrimino != "undefined" && typeof nextTetriminoType != "undefined") {
         //copy next tetrimino to current one and render it
         currentTetrimino = createNewTetromino(StartPosX, StartPosY, nextTetriminoType)
-        // renderTetrimino(currentTetrimino, currentTetriminoMode, 'draw', 'main')
         //clear the next canvas
         renderTetrimino(nextTetrimino, currentTetriminoMode, 'erase', 'next')
     } else {
         //create a current tetrimino and render it
         nextTetriminoType = Math.floor(Math.random() * 7)
         currentTetrimino = createNewTetromino(StartPosX, StartPosY, nextTetriminoType)
-        // renderTetrimino(currentTetrimino, currentTetriminoMode, 'draw', 'main')
     }
     //create a new next tetrimino and render it
     nextTetriminoType = Math.floor(Math.random() * 7)
     nextTetrimino = createNewTetromino(NextPosX, NextPosY, nextTetriminoType)
-    // renderTetrimino(nextTetrimino, currentTetriminoMode, 'draw', 'next')
 }
 
 function addToFallenBlockMap(coordinates, colorIndex) {
@@ -46,11 +44,14 @@ function addToFallenBlockMap(coordinates, colorIndex) {
     }
 }
 
-
-//change Tetrimino's location/status
+//Try to rotate the current tetrimino if the next coordinates don't collide.
 function rotate() {
     if (isGameStarted) {
         renderTetrimino(currentTetrimino, currentTetriminoMode, 'erase', 'main')
+        // Calculate the next rotation mode
+        // The mod operator wraps the mode back to 0 after the last state
+        // L tetrimino example: 0 -> 1 -> 2 -> 3 -> 0 -> ...
+        // O tetrimino example: 0 -> 0 -> ...
         let nextMode = (currentTetriminoMode + 1) % currentTetrimino.getMaxModeNum()
         nextTetriminoCoor = currentTetrimino.getCoordinate(nextMode)
         if (!isCollided(nextTetriminoCoor)) {
@@ -62,6 +63,9 @@ function rotate() {
     }
 }
 
+// Move the current tetrimino down by one cell.
+// If it will collide after moving down, fix it to FallenBlockMap, clear completed rows, 
+// then generate the next tetrimino.
 function moveDown() {
     if (isGameStarted) {
         renderTetrimino(currentTetrimino, currentTetriminoMode, 'erase', 'main')
@@ -112,16 +116,19 @@ function moveRight() {
 }
 
 
-//check Tetrimino's status
+//Check whether the given coordinates collides with wall, the bottom or existing fixed blocks
 function isCollided(coordinates) {
     if (isGameStarted) {
         for (let i = 0; i < coordinates.length; i++) {
+            // left or right wall
             if (coordinates[i][0] < 0 || coordinates[i][0] >= GridCountX) {
                 return true
             }
+            // bottom
             if (coordinates[i][1] >= GridCountY) {
                 return true
             }
+            // existing fixed blocks
             if (FallenBlockMap[coordinates[i][1]][coordinates[i][0]] != 0) {
                 return true
             }
@@ -142,7 +149,11 @@ function checkGameOver() {
     }
 }
 
+// Check completed rows from bottom to top.
+// If there is not any empty cell in a row, remove that row and add a new empty row at the top.
 function checkRow() {
+    // sum represents the sum of all values in a row. If 0, means all cells are empty.
+    // multi represents the product of all values in a row. If 0, means any cell is empty.
     let sum, multi
     let row = GridCountY - 1
     while (true) {
@@ -152,16 +163,18 @@ function checkRow() {
             multi *= FallenBlockMap[row][i]
             sum += FallenBlockMap[row][i]
         }
-        if (sum == 0) {
+        // If a row is completely empty, it isn't necessary to check the rows above
+        if (sum === 0) {
             break;
         }
-        if (multi != 0) {
+        // If a row is full, remove that row and add a new empty row at the top
+        if (multi !== 0) {
             FallenBlockMap = FallenBlockMap.slice(0, row).concat(FallenBlockMap.slice(row + 1, GridCountY - 1))
             FallenBlockMap.unshift([0, 0, 0, 0, 0, 0, 0, 0, 0, 0])
-            score+=10
+            score += 10
             renderScore()
         } else {
-            row--
+            row --
         }
     }
 }
@@ -176,9 +189,13 @@ class ITetrimino {
     getColorIndex() {
         return 1
     }
+    // Return the number of rotation states for this kind of tetrimino
+    // I, S, Z have 2 states, O has 1 state, J,L, T have 4 states.
     getMaxModeNum() {
         return 2
     }
+    // Return the 4 blocks' coordinates occupied by this terimino.
+    // mode represents the rotation state.
     getCoordinate(mode) {
         switch (mode) {
             case 0:

@@ -21,6 +21,9 @@ let nextTetriminoCoor
 let currentTetrimino
 let nextTetriminoType
 let currentTetriminoMode = 0
+
+// FallenBlockMap[y][x] represents each cell on the main board.
+// 0 means empty, 1~7 means a fixed block with a color index.(Colors in constants.js)
 let FallenBlockMap = []
 
 gameStartBtn.addEventListener('click', gameStart)
@@ -92,6 +95,9 @@ function renderFallenBlock() {
     }
 }
 
+// draw or erase a tetrimino by rendering its 4 cells
+// draw: use the tetrimino's color
+// erase: use the "white" color
 function renderTetrimino(t, mode, type, canvas) {
     if (type === 'draw') {
         for (let i = 0; i < 4; i++) {
