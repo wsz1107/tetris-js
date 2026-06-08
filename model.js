@@ -149,14 +149,25 @@ function checkGameOver() {
     }
 }
 
+function checkFallenBlockMapShape(context) {
+    if (FallenBlockMap.length !== GridCountY || FallenBlockMap.some(row => !row || row.length !== GridCountX)) {
+        console.error(`${context}: invalid FallenBlockMap shape`, FallenBlockMap)
+        return false
+    }
+    return true
+}
+
 // Check completed rows from bottom to top.
 // If there is not any empty cell in a row, remove that row and add a new empty row at the top.
 function checkRow() {
+    if (!checkFallenBlockMapShape('checkRow start')) {
+        return
+    }
     // sum represents the sum of all values in a row. If 0, means all cells are empty.
     // multi represents the product of all values in a row. If 0, means any cell is empty.
     let sum, multi
     let row = GridCountY - 1
-    while (true) {
+    while (row >= 0) {
         multi = 1
         sum = 0
         for (let i = 0; i < GridCountX; i++) {
@@ -169,10 +180,11 @@ function checkRow() {
         }
         // If a row is full, remove that row and add a new empty row at the top
         if (multi !== 0) {
-            FallenBlockMap = FallenBlockMap.slice(0, row).concat(FallenBlockMap.slice(row + 1, GridCountY - 1))
+            FallenBlockMap.splice(row, 1)
             FallenBlockMap.unshift([0, 0, 0, 0, 0, 0, 0, 0, 0, 0])
             score += 10
             renderScore()
+            checkFallenBlockMapShape('checkRow after clearing row')
         } else {
             row --
         }
